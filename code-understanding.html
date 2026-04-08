@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>DocuChat AI — Complete Code Understanding</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#4f6ef7;--purple:#7c3aed;--green:#10b981;--yellow:#f59e0b;--red:#ef4444;
+  --bg:#ffffff;--surface:#f8f8fb;--border:#e4e4ef;--text:#0f0f1a;--muted:#5b5b7a;
+  --code-bg:#13131f;--code-text:#dde2f0;
+}
+html{font-size:14.5px}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.75;max-width:920px;margin:0 auto;padding:48px 40px 80px}
+
+/* COVER */
+.cover{text-align:center;padding:52px 0 40px;border-bottom:2px solid var(--border);margin-bottom:48px}
+.cover .pill{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 16px;border-radius:99px;margin-bottom:22px}
+.cover h1{font-size:2.4rem;font-weight:700;letter-spacing:-.025em;line-height:1.2;margin-bottom:12px}
+.cover h1 em{font-style:normal;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.cover p{font-size:1rem;color:var(--muted);max-width:540px;margin:0 auto 24px}
+.cover-meta{display:flex;justify-content:center;flex-wrap:wrap;gap:20px;font-size:.8rem;color:var(--muted)}
+.cover-meta span{display:flex;align-items:center;gap:6px}
+.cover-meta span::before{content:'';width:7px;height:7px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));flex-shrink:0}
+
+/* TOC */
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:48px}
+.toc-title{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+.toc-item{font-size:.88rem;padding:3px 0;border-bottom:1px dotted var(--border)}
+.toc-item a{color:var(--blue);text-decoration:none}
+.toc-item a:hover{text-decoration:underline}
+.toc-item .num{color:var(--muted);font-size:.78rem;margin-right:6px}
+
+/* SECTION */
+section{margin-bottom:56px}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.section-num{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:.75rem;font-weight:700;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.section-header h2{font-size:1.3rem;font-weight:700;letter-spacing:-.015em}
+h3{font-size:.98rem;font-weight:600;margin:22px 0 10px;color:var(--text)}
+h4{font-size:.88rem;font-weight:600;margin:16px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+p{margin-bottom:10px;font-size:.9rem}
+ul,ol{padding-left:20px;margin-bottom:10px}
+li{font-size:.9rem;margin:4px 0}
+
+/* FILE PATH BADGE */
+.filepath{display:inline-flex;align-items:center;gap:6px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:6px;padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:#4338ca;margin-bottom:6px}
+.filepath::before{content:'📄';font-size:.75rem}
+
+/* CODE */
+pre{background:var(--code-bg);color:var(--code-text);border-radius:10px;padding:16px 20px;font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.65;overflow-x:auto;margin:10px 0 14px;page-break-inside:avoid}
+code{font-family:'JetBrains Mono',monospace;background:#eef0f8;padding:1px 5px;border-radius:4px;font-size:.8em;color:#4338ca}
+pre code{background:none;padding:0;color:inherit;font-size:inherit}
+.c{color:#6a9955}.kw{color:#569cd6}.fn{color:#dcdcaa}.str{color:#ce9178}.num{color:#b5cea8}.cm{color:#858585}.type{color:#4ec9b0}
+
+/* CALLOUT */
+.callout{border-radius:8px;padding:13px 16px;margin:12px 0 16px;font-size:.875rem;page-break-inside:avoid}
+.callout.info{background:#eff6ff;border-left:4px solid var(--blue)}
+.callout.warn{background:#fffbeb;border-left:4px solid var(--yellow)}
+.callout.tip{background:#f0fdf4;border-left:4px solid var(--green)}
+.callout.danger{background:#fff1f2;border-left:4px solid var(--red)}
+.callout strong{display:block;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.callout.info strong{color:var(--blue)}.callout.warn strong{color:var(--yellow)}
+.callout.tip strong{color:var(--green)}.callout.danger strong{color:var(--red)}
+
+/* FILE CARDS */
+.file-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.file-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.file-card .fc-path{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--purple);margin-bottom:6px;font-weight:500}
+.file-card .fc-role{font-size:.82rem;font-weight:600;margin-bottom:4px}
+.file-card .fc-desc{font-size:.8rem;color:var(--muted);line-height:1.5}
+
+/* FLOW DIAGRAM */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;margin:14px 0}
+.flow-step{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 14px;font-size:.8rem;font-weight:500;text-align:center;white-space:nowrap}
+.flow-arrow{color:var(--muted);font-size:1.1rem;padding:0 6px;flex-shrink:0}
+
+/* API TABLE */
+table{width:100%;border-collapse:collapse;margin:12px 0 16px;font-size:.82rem;page-break-inside:avoid}
+thead tr{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+thead th{padding:10px 14px;text-align:left;font-weight:600;font-size:.8rem}
+tbody tr:nth-child(even){background:var(--surface)}
+tbody td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody td:first-child{font-family:'JetBrains Mono',monospace;font-size:.75rem;white-space:nowrap}
+.method{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.7rem;font-weight:700;font-family:'JetBrains Mono',monospace}
+.GET{background:#dcfce7;color:#166534}.POST{background:#dbeafe;color:#1e40af}
+.DELETE{background:#fee2e2;color:#991b1b}.PUT{background:#fef3c7;color:#92400e}
+
+/* STATE TABLE */
+.state-row{display:grid;grid-template-columns:180px 1fr;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin:10px 0;font-size:.83rem}
+.state-key{background:var(--surface);padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--purple);border-right:1px solid var(--border);font-weight:500}
+.state-val{padding:8px 12px;color:var(--muted)}
+
+/* SECTION divider */
+.divider{height:1px;background:var(--border);margin:40px 0}
+
+/* FOOTER */
+.footer{text-align:center;padding-top:24px;border-top:1px solid var(--border);font-size:.78rem;color:var(--muted);margin-top:60px}
+
+@media print{
+  body{padding:20px 24px}
+  section{page-break-inside:avoid}
+  h2,h3{page-break-after:avoid}
+  pre,table,.callout,.file-card{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════ COVER ════════════════════ -->
+<div class="cover">
+  <div class="pill">Technical Reference</div>
+  <h1>DocuChat AI<br><em>Complete Code Understanding</em></h1>
+  <p>A thorough file-by-file walkthrough of the entire codebase — backend, frontend, data flow, APIs, state management, and key algorithms.</p>
+  <div class="cover-meta">
+    <span>Stack: React + Vite + Express.js</span>
+    <span>AI: LangChain + OpenRouter</span>
+    <span>DB: MongoDB + Cloudinary</span>
+    <span>Auth: JWT + bcrypt</span>
+  </div>
+</div>
+
+<!-- ════════════════════ TOC ════════════════════ -->
+<div class="toc">
+  <div class="toc-title">Table of Contents</div>
+  <div class="toc-grid">
+    <div class="toc-item"><span class="num">1.</span><a href="#s1">Project Architecture</a></div>
+    <div class="toc-item"><span class="num">2.</span><a href="#s2">Backend — server.js</a></div>
+    <div class="toc-item"><span class="num">3.</span><a href="#s3">Backend — ingest.js</a></div>
+    <div class="toc-item"><span class="num">4.</span><a href="#s4">Backend — qa_chain.js</a></div>
+    <div class="toc-item"><span class="num">5.</span><a href="#s5">Backend — Auth System</a></div>
+    <div class="toc-item"><span class="num">6.</span><a href="#s6">Backend — Database Models</a></div>
+    <div class="toc-item"><span class="num">7.</span><a href="#s7">Frontend — App.jsx</a></div>
+    <div class="toc-item"><span class="num">8.</span><a href="#s8">Frontend — AuthContext.jsx</a></div>
+    <div class="toc-item"><span class="num">9.</span><a href="#s9">Frontend — Chat.jsx</a></div>
+    <div class="toc-item"><span class="num">10.</span><a href="#s10">Complete API Reference</a></div>
+    <div class="toc-item"><span class="num">11.</span><a href="#s11">Data &amp; Request Flow</a></div>
+    <div class="toc-item"><span class="num">12.</span><a href="#s12">Key Algorithms Explained</a></div>
+  </div>
+</div>
+
+<!-- ════════════════════ SECTION 1 — ARCHITECTURE ════════════════════ -->
+<section id="s1">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <h2>Project Architecture</h2>
+  </div>
+
+  <p>DocuChat AI is a <strong>monorepo</strong> with two completely independent apps that share a single GitHub repository. Each app has its own <code>package.json</code>, <code>node_modules</code>, and runtime environment.</p>
+
+  <div class="file-grid">
+    <div class="file-card">
+      <div class="fc-path">frontend/</div>
+      <div class="fc-role">React + Vite SPA</div>
+      <div class="fc-desc">The user interface. Built with React 18 and Vite. Communicates with the backend only via HTTP. Has no direct database access.</div>
+    </div>
+    <div class="file-card">
+      <div class="fc-path">backend/</div>
+      <div class="fc-role">Express.js REST API</div>
+      <div class="fc-desc">All business logic lives here — file ingestion, vector search, LLM calls, auth, and chat history persistence.</div>
+    </div>
+    <div class="file-card">
+      <div class="fc-path">MongoDB (local / Atlas)</div>
+      <div class="fc-role">Persistent Storage</div>
+      <div class="fc-desc">Stores users, chat history. Currently the vector index is stored on the local filesystem (not MongoDB) — see ingest.js.</div>
+    </div>
+    <div class="file-card">
+      <div class="fc-path">Cloudinary</div>
+      <div class="fc-role">File Storage CDN</div>
+      <div class="fc-desc">Every uploaded PDF/image is uploaded to Cloudinary immediately after receipt. The raw file buffer is never written to disk on the server.</div>
+    </div>
+  </div>
+
+  <h3>Directory Tree (source files only)</h3>
+  <pre><code>PDF Q&A Bot JS/
+├── backend/
+│   ├── server.js            <c>← Express app entry point + all routes</c>
+│   ├── ingest.js            <c>← File parsing, chunking, embedding, index save</c>
+│   ├── qa_chain.js          <c>← Vector retrieval + LLM call + streaming</c>
+│   ├── db.js                <c>← MongoDB connection (singleton)</c>
+│   ├── middleware/
+│   │   └── authMiddleware.js <c>← JWT verification middleware</c>
+│   ├── models/
+│   │   ├── User.js          <c>← Mongoose User schema</c>
+│   │   └── ChatHistory.js   <c>← Mongoose ChatHistory schema</c>
+│   └── routes/
+│       └── auth.js          <c>← /register, /login, /me routes</c>
+└── frontend/
+    └── src/
+        ├── main.jsx         <c>← React entry; wraps App in AuthProvider</c>
+        ├── App.jsx          <c>← Root: auth gate + all state + handlers</c>
+        ├── context/
+        │   └── AuthContext.jsx  <c>← Login/register/logout + authFetch</c>
+        └── components/
+            ├── Chat.jsx         <c>← Message list, input bar, file upload</c>
+            ├── Sidebar.jsx      <c>← File list, settings, controls</c>
+            ├── MessageBubble.jsx<c>← Renders user/assistant messages</c>
+            ├── SourceChunks.jsx <c>← Shows retrieved document chunks</c>
+            ├── ExecutionTrace.jsx<c>← Shows LLM pipeline trace steps</c>
+            ├── Toast.jsx        <c>← Notification component</c>
+            ├── Login.jsx        <c>← Login form</c>
+            └── Register.jsx     <c>← Registration form</c></code></pre>
+</section>
+
+<!-- ════════════════════ SECTION 2 — server.js ════════════════════ -->
+<section id="s2">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <h2>Backend — server.js</h2>
+  </div>
+
+  <div class="filepath">backend/server.js</div>
+  <p><strong>Role:</strong> The Express application entry point. It configures all middleware, defines every HTTP route, and starts the server after connecting to MongoDB.</p>
+
+  <h3>Startup Sequence</h3>
+  <div class="flow">
+    <div class="flow-step">Import modules</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Configure Cloudinary</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Create Express app</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Register middleware</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Mount routes</div><div class="flow-arrow">→</div>
+    <div class="flow-step">connectDB()</div><div class="flow-arrow">→</div>
+    <div class="flow-step">app.listen(3001)</div>
+  </div>
+
+  <h3>Middleware Stack (applied in order)</h3>
+  <table>
+    <thead><tr><th>Middleware</th><th>Purpose</th><th>Applied To</th></tr></thead>
+    <tbody>
+      <tr><td>cors()</td><td>Reads <code>ALLOWED_ORIGINS</code> env var and allows only those origins. Supports credentials.</td><td>All routes</td></tr>
+      <tr><td>express.json()</td><td>Parses <code>application/json</code> request bodies.</td><td>All routes</td></tr>
+      <tr><td>express-rate-limit</td><td>100 requests per 15 minutes per IP. Prevents brute force/abuse.</td><td><code>/api/*</code></td></tr>
+      <tr><td>multer (memoryStorage)</td><td>Parses <code>multipart/form-data</code> uploads. Stores file in <code>req.files</code> as Buffer — never touches disk.</td><td><code>POST /api/upload</code></td></tr>
+      <tr><td>requireAuth</td><td>Verifies the <code>Authorization: Bearer &lt;token&gt;</code> header on every protected route.</td><td>All <code>/api/*</code> except <code>/api/auth</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Route Map</h3>
+  <table>
+    <thead><tr><th>Method + Path</th><th>Auth?</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method POST">POST</span> /api/auth/register</td><td>No</td><td>Create account, return JWT token</td></tr>
+      <tr><td><span class="method POST">POST</span> /api/auth/login</td><td>No</td><td>Validate credentials, return JWT token</td></tr>
+      <tr><td><span class="method GET">GET</span> /api/auth/me</td><td>Yes</td><td>Return user info from token</td></tr>
+      <tr><td><span class="method GET">GET</span> /api/status</td><td>Yes</td><td>Return whether index exists + list of indexed files for the user</td></tr>
+      <tr><td><span class="method POST">POST</span> /api/upload</td><td>Yes</td><td>Accept 1-5 files, upload to Cloudinary, run ingestFile() for each</td></tr>
+      <tr><td><span class="method POST">POST</span> /api/ask</td><td>Yes</td><td>Non-streaming Q&amp;A — returns full answer in one JSON response</td></tr>
+      <tr><td><span class="method POST">POST</span> /api/ask/stream</td><td>Yes</td><td>Streaming Q&amp;A — SSE stream, tokens arrive incrementally</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span> /api/index/:filename</td><td>Yes</td><td>Remove one file from the vector index + delete from Cloudinary</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span> /api/index</td><td>Yes</td><td>Delete entire index + all Cloudinary files for the user</td></tr>
+      <tr><td><span class="method GET">GET</span> /api/chat/history</td><td>Yes</td><td>Load full chat history from MongoDB</td></tr>
+      <tr><td><span class="method POST">POST</span> /api/chat/history</td><td>Yes</td><td>Append new messages to history (<code>$push</code>)</td></tr>
+      <tr><td><span class="method PUT">PUT</span> /api/chat/history</td><td>Yes</td><td>Replace entire history (<code>$set</code>) — used after regenerate</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span> /api/chat/history</td><td>Yes</td><td>Clear all messages for the user</td></tr>
+    </tbody>
+  </table>
+
+  <h3>uploadToCloudinary() helper</h3>
+  <p>Accepts a raw <code>Buffer</code> and original filename. Uses the Cloudinary upload stream API to avoid buffering the entire file twice. Returns <code>{ url, publicId }</code> on success.</p>
+  <pre><code><kw>function</kw> <fn>uploadToCloudinary</fn>(buffer, filename) {
+  <kw>return new</kw> Promise((resolve, reject) => {
+    <c>// Sanitise filename → safe publicId</c>
+    <kw>const</kw> publicId = <str>`pdf-qa-bot/${safeName}-${Date.now()}`</str>;
+    <kw>const</kw> stream = cloudinary.uploader.upload_stream(
+      { resource_type: <str>"auto"</str>, public_id: publicId },
+      (error, result) => { <kw>if</kw> (error) reject(...); <kw>else</kw> resolve({url, publicId}); }
+    );
+    stream.end(buffer); <c>// push buffer into the upload stream</c>
+  });
+}</code></pre>
+
+  <h3>splitQuestions() — Multi-question detection</h3>
+  <p>Before calling <code>runQA</code>, the server splits the user's question string on <code>?</code>. If the user asks "What is X? What is Y?", it runs two parallel Q&amp;A calls and returns both results in the <code>results[]</code> array.</p>
+</section>
+
+<!-- ════════════════════ SECTION 3 — ingest.js ════════════════════ -->
+<section id="s3">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <h2>Backend — ingest.js</h2>
+  </div>
+
+  <div class="filepath">backend/ingest.js</div>
+  <p><strong>Role:</strong> Converts uploaded files into vector embeddings and saves them to the filesystem as JSON. Supports PDF, TXT, Excel (XLSX/XLS), and images (PNG, JPG, GIF, WEBP).</p>
+
+  <h3>Ingestion Pipeline</h3>
+  <div class="flow">
+    <div class="flow-step">File Buffer</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Extract Text</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Chunk Text</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Embed Chunks</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Merge into Store</div><div class="flow-arrow">→</div>
+    <div class="flow-step">Save store.json</div>
+  </div>
+
+  <h3>File Type Handlers</h3>
+  <table>
+    <thead><tr><th>Function</th><th>File Type</th><th>How text is extracted</th></tr></thead>
+    <tbody>
+      <tr><td>ingestPDF()</td><td>.pdf</td><td><code>pdf-parse</code> library reads the buffer and returns <code>pdfData.text</code> — the raw text of all pages concatenated.</td></tr>
+      <tr><td>ingestTXT()</td><td>.txt</td><td><code>buffer.toString("utf8")</code> — direct decode.</td></tr>
+      <tr><td>ingestExcel()</td><td>.xlsx / .xls</td><td>XLSX library reads each sheet, converts to CSV strings, joins them with sheet name headers.</td></tr>
+      <tr><td>ingestImage()</td><td>.png/.jpg/etc.</td><td>Base64-encodes the image and sends it to GPT-4o-mini's vision endpoint. The returned description text is then embedded. This lets the system answer questions about diagrams, charts, etc.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>ingestText() — Core function (called by all handlers)</h3>
+  <pre><code><kw>async function</kw> <fn>ingestText</fn>(text, filename, fileSize, extraMeta, cloudinaryData, userId) {
+  <c>// 1. Split text into ~1000-char chunks with 150-char overlap</c>
+  <kw>const</kw> splitter = <kw>new</kw> RecursiveCharacterTextSplitter({ chunkSize: <num>1000</num>, chunkOverlap: <num>150</num> });
+  <kw>const</kw> docs = <kw>await</kw> splitter.createDocuments([text], [{ source: filename }]);
+
+  <c>// 2. Embed all chunks with text-embedding-ada-002 via OpenRouter</c>
+  <kw>const</kw> embeddings = <kw>new</kw> OpenAIEmbeddings({ model: <str>"openai/text-embedding-ada-002"</str>, ... });
+  <kw>const</kw> newStore = <kw>await</kw> MemoryVectorStore.fromDocuments(docs, embeddings);
+
+  <c>// 3. Generate a 2-3 sentence summary of the document</c>
+  <kw>const</kw> summary = <kw>await</kw> <fn>generateSummary</fn>(text);
+
+  <c>// 4. Read existing store.json, merge new vectors with old, save</c>
+  <kw>const</kw> mergedVectors = [...existingVectors, ...newStore.memoryVectors];
+  fs.writeFileSync(indexFile, JSON.stringify({ vectors, files, cloudinaryMeta }));
+}</code></pre>
+
+  <h3>Vector Index Storage Format</h3>
+  <p>Each user gets their own directory: <code>./vector_index/{userId}/store.json</code>. The JSON file has this shape:</p>
+  <pre><code>{
+  <str>"vectors"</str>: [
+    {
+      <str>"content"</str>: <str>"...chunk text..."</str>,
+      <str>"embedding"</str>: [<num>0.023</num>, <num>-0.417</num>, <num>0.891</num>, ...],   <c>// 1536 floats</c>
+      <str>"metadata"</str>: { <str>"source"</str>: <str>"report.pdf"</str>, <str>"totalPages"</str>: <num>12</num> }
+    },
+    ...
+  ],
+  <str>"files"</str>: [
+    { <str>"name"</str>: <str>"report.pdf"</str>, <str>"size"</str>: <num>204800</num>, <str>"uploadedAt"</str>: <str>"2026-04-04T..."</str>, <str>"summary"</str>: <str>"..."</str> }
+  ],
+  <str>"cloudinaryMeta"</str>: {
+    <str>"report.pdf"</str>: { <str>"url"</str>: <str>"https://res.cloudinary.com/..."</str>, <str>"publicId"</str>: <str>"pdf-qa-bot/..."</str> }
+  }
+}</code></pre>
+
+  <div class="callout warn">
+    <strong>Vercel Incompatibility</strong>
+    The <code>fs.writeFileSync</code> / <code>fs.readFileSync</code> calls here write to the local filesystem. Vercel serverless functions have a read-only filesystem. This must be replaced with MongoDB reads/writes before deploying to Vercel.
+  </div>
+
+  <h3>Exported functions used by server.js</h3>
+  <table>
+    <thead><tr><th>Export</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>ingestFile(buffer, filename, cloudinaryData, userId)</td><td>Entry point — dispatches to the right handler based on file extension</td></tr>
+      <tr><td>indexExists(userId)</td><td>Returns true if <code>store.json</code> exists for the user</td></tr>
+      <tr><td>indexedFiles(userId)</td><td>Returns the <code>files[]</code> array from <code>store.json</code></td></tr>
+      <tr><td>IMAGE_EXTENSIONS</td><td>Set of image extensions: <code>.png .jpg .jpeg .gif .webp</code></td></tr>
+      <tr><td>setInvalidateCache(fn)</td><td>Registers the <code>invalidateCache</code> function from qa_chain.js (called after ingest so the vector store cache is cleared)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════ SECTION 4 — qa_chain.js ════════════════════ -->
+<section id="s4">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <h2>Backend — qa_chain.js</h2>
+  </div>
+
+  <div class="filepath">backend/qa_chain.js</div>
+  <p><strong>Role:</strong> Loads the vector index, retrieves relevant document chunks for a question, builds a prompt, and calls the LLM. Exposes both a regular (non-streaming) and a streaming (async generator) version.</p>
+
+  <h3>Two-Level Cache</h3>
+  <table>
+    <thead><tr><th>Cache</th><th>Key</th><th>Value</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><code>vectorStoreCache</code> (Map)</td><td>userId</td><td><code>{ store, embeddings }</code></td><td>Avoids re-reading and re-parsing <code>store.json</code> from disk on every request. Cleared by <code>invalidateCache(userId)</code> after any new ingest or delete.</td></tr>
+      <tr><td><code>embeddingCache</code> (Map, max 100)</td><td>question string</td><td>float[] embedding</td><td>Avoids re-calling the embedding API for the same question. Uses LRU eviction (oldest entry deleted when size exceeds 100).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Multi-Model Support via TIKTOKEN_MAP</h3>
+  <p>LangChain's <code>ChatOpenAI</code> uses <code>tiktoken</code> internally to count tokens. <code>tiktoken</code> only knows bare OpenAI model names. But OpenRouter requires prefixed names like <code>"openai/gpt-4o-mini"</code>. The fix:</p>
+  <pre><code><kw>const</kw> TIKTOKEN_MAP = {
+  <str>"openai/gpt-4o-mini"</str>:          <str>"gpt-4o-mini"</str>,   <c>// exact match</c>
+  <str>"anthropic/claude-3.5-sonnet"</str>: <str>"gpt-4o"</str>,        <c>// approximation</c>
+  <str>"google/gemini-2.5-flash"</str>:     <str>"gpt-4o"</str>,        <c>// approximation</c>
+};
+<c>// createLLM() maps the model name for tiktoken, but passes the real</c>
+<c>// model name in modelKwargs so OpenRouter receives the correct model.</c></code></pre>
+
+  <h3>Retrieval Pipeline — retrieveChunks()</h3>
+  <p>Standard mode (no query expansion): embeds the question, calls <code>similaritySearchVectorWithScore()</code> with an optional file filter, then filters results below a <strong>0.2 cosine similarity threshold</strong>.</p>
+  <p>Query expansion mode: generates 2 alternative phrasings of the question via the LLM, retrieves top-k chunks for each phrasing, deduplicates by content prefix, then re-ranks by score and returns the best k.</p>
+  <pre><code><c>// Query expansion flow:</c>
+original → <str>"What is X?"</str>
+alt 1    → <str>"How does X work?"</str>   (generated by LLM)
+alt 2    → <str>"Explain X"</str>           (generated by LLM)
+
+<c>// All 3 are embedded and searched → deduplicated → top-k re-ranked</c></code></pre>
+
+  <h3>Prompt Template</h3>
+  <pre><code><str>`Use ONLY the context below to answer.
+If not found say 'I don't have that information'.
+
+Context: {context}
+
+Question: {question}
+
+Answer:`</str>
+<c>// The last 6 conversation turns (3 pairs) are prepended as:</c>
+<c>// "Previous conversation:\nUser: ...\nAssistant: ..."</c></code></pre>
+
+  <h3>runQA() — Non-Streaming</h3>
+  <p>Runs all 4 pipeline steps synchronously. Returns a single JSON object with <code>{ answer, sources, trace, suggestions }</code>. Used by <code>POST /api/ask</code>.</p>
+
+  <h3>runQAStream() — Async Generator (Streaming)</h3>
+  <p>An <code>async function*</code> (async generator). The Express handler reads from this generator and writes each event to the SSE response. Yields three event types:</p>
+  <table>
+    <thead><tr><th>Event type</th><th>Payload</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><code>token</code></td><td><code>{ type:"token", content:"..." }</code></td><td>For every chunk streamed from the LLM</td></tr>
+      <tr><td><code>done</code></td><td><code>{ type:"done", answer, sources, trace, suggestions }</code></td><td>After stream completes and suggestions/sources are built</td></tr>
+      <tr><td><code>error</code></td><td><code>{ type:"error", message:"..." }</code></td><td>If any step fails</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout tip">
+    <strong>Trace System</strong>
+    Both <code>runQA</code> and <code>runQAStream</code> maintain a <code>trace[]</code> array that records each pipeline step with <code>{ title, detail, state }</code>. The frontend's <code>ExecutionTrace.jsx</code> renders this as a step-by-step execution log so users can see exactly what happened.
+  </div>
+</section>
+
+<!-- ════════════════════ SECTION 5 — AUTH ════════════════════ -->
+<section id="s5">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <h2>Backend — Auth System</h2>
+  </div>
+
+  <h3>routes/auth.js</h3>
+  <div class="filepath">backend/routes/auth.js</div>
+  <p>Three routes. No external auth service — everything is done with <code>bcryptjs</code> and <code>jsonwebtoken</code>.</p>
+
+  <table>
+    <thead><tr><th>Route</th><th>Input</th><th>Logic</th><th>Response</th></tr></thead>
+    <tbody>
+      <tr><td>POST /register</td><td>name, email, password</td><td>Check email not taken → <code>bcrypt.hash(password, 12)</code> → <code>User.create()</code> → <code>jwt.sign()</code></td><td><code>{ token, user }</code></td></tr>
+      <tr><td>POST /login</td><td>email, password</td><td><code>User.findOne(email)</code> → <code>bcrypt.compare()</code> → <code>jwt.sign()</code></td><td><code>{ token, user }</code></td></tr>
+      <tr><td>GET /me</td><td>Authorization header</td><td>requireAuth middleware validates JWT → return <code>req.user</code></td><td><code>{ user }</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>JWT Token</h3>
+  <p>Signed with <code>process.env.JWT_SECRET</code>. Expires in <strong>7 days</strong>. Payload: <code>{ id, name, email }</code>. Verified on every protected route by <code>authMiddleware.js</code>.</p>
+
+  <h3>middleware/authMiddleware.js</h3>
+  <div class="filepath">backend/middleware/authMiddleware.js</div>
+  <pre><code><kw>export function</kw> <fn>requireAuth</fn>(req, res, next) {
+  <kw>const</kw> token = req.headers.authorization?.slice(<num>7</num>); <c>// strip "Bearer "</c>
+  <kw>if</kw> (!token) <kw>return</kw> res.status(<num>401</num>).json({ error: <str>"Authentication required."</str> });
+  <kw>const</kw> decoded = jwt.verify(token, process.env.JWT_SECRET);
+  req.user = { id: decoded.id, name: decoded.name, email: decoded.email };
+  <fn>next</fn>(); <c>// attaches user to the request for all downstream handlers</c>
+}</code></pre>
+  <p>Every downstream route accesses the authenticated user via <code>req.user.id</code>. All vector index operations are <strong>namespaced by userId</strong> — users can never access each other's data.</p>
+</section>
+
+<!-- ════════════════════ SECTION 6 — MODELS ════════════════════ -->
+<section id="s6">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <h2>Backend — Database Models</h2>
+  </div>
+
+  <h3>db.js — MongoDB Connection</h3>
+  <div class="filepath">backend/db.js</div>
+  <p>A singleton. Uses a module-level <code>isConnected</code> flag so <code>connectDB()</code> is safe to call multiple times (no duplicate connections).</p>
+  <pre><code><kw>let</kw> isConnected = <kw>false</kw>;
+<kw>export async function</kw> <fn>connectDB</fn>() {
+  <kw>if</kw> (isConnected) <kw>return</kw>;       <c>// guard — skip if already connected</c>
+  <kw>await</kw> mongoose.connect(process.env.MONGODB_URI);
+  isConnected = <kw>true</kw>;
+}</code></pre>
+
+  <h3>models/User.js</h3>
+  <div class="filepath">backend/models/User.js</div>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>name</td><td>String</td><td>Required, trimmed</td></tr>
+      <tr><td>email</td><td>String</td><td>Required, unique, lowercased, trimmed</td></tr>
+      <tr><td>password</td><td>String</td><td>Required — stored as bcrypt hash (cost factor 12)</td></tr>
+      <tr><td>createdAt / updatedAt</td><td>Date</td><td>Auto-managed by <code>{ timestamps: true }</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>models/ChatHistory.js</h3>
+  <div class="filepath">backend/models/ChatHistory.js</div>
+  <p>One document per user (unique <code>userId</code> index). Contains an array of <code>messageSchema</code> sub-documents.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>userId</td><td>ObjectId → User</td><td>Required, unique</td></tr>
+      <tr><td>messages[].role</td><td>String enum</td><td>"user" or "assistant"</td></tr>
+      <tr><td>messages[].content</td><td>String</td><td>The message text</td></tr>
+      <tr><td>messages[].sources</td><td>Mixed</td><td>Source chunk references (for assistant messages)</td></tr>
+      <tr><td>messages[].trace</td><td>Mixed</td><td>Pipeline execution trace steps</td></tr>
+      <tr><td>messages[].suggestions</td><td>[String]</td><td>3 follow-up question suggestions</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════ SECTION 7 — App.jsx ════════════════════ -->
+<section id="s7">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <h2>Frontend — App.jsx</h2>
+  </div>
+
+  <div class="filepath">frontend/src/App.jsx</div>
+  <p><strong>Role:</strong> The root component. Acts as the auth gate (renders Login/Register if not logged in) and as the <strong>single source of truth for all application state</strong>. All handlers live here and are passed down as props.</p>
+
+  <h3>Component Structure</h3>
+  <pre><code>App()                    <c>← checks loading + user from AuthContext</c>
+ ├── if loading  → spinner
+ ├── if !user    → Login | Register
+ └── MainApp()
+      ├── Sidebar (props: indexed, files, settings, handlers)
+      └── Chat    (props: messages, asking, handlers)</code></pre>
+
+  <h3>State Variables (MainApp)</h3>
+  <div class="state-row"><div class="state-key">indexed</div><div class="state-val">Boolean — true when at least one file is embedded for this user</div></div>
+  <div class="state-row"><div class="state-key">indexedFiles</div><div class="state-val">Array of <code>{ name, size, uploadedAt, summary }</code> objects from the backend</div></div>
+  <div class="state-row"><div class="state-key">messages</div><div class="state-val">Array of message objects <code>{ role, content, sources?, trace?, suggestions?, streaming? }</code></div></div>
+  <div class="state-row"><div class="state-key">uploading</div><div class="state-val">Boolean — true while a file upload + ingest is in progress</div></div>
+  <div class="state-row"><div class="state-key">asking</div><div class="state-val">Boolean — true while waiting for an LLM response</div></div>
+  <div class="state-row"><div class="state-key">settings</div><div class="state-val">Object persisted in localStorage: <code>{ k, chainType, model, queryExpansion, ... }</code></div></div>
+  <div class="state-row"><div class="state-key">filterFile</div><div class="state-val">String|null — when set, Q&amp;A only searches chunks from this specific file</div></div>
+  <div class="state-row"><div class="state-key">sidebarOpen</div><div class="state-val">Boolean — controlled sidebar visibility (responsive layout)</div></div>
+
+  <h3>Key Handlers</h3>
+
+  <h4>handleUpload(files, onProgress)</h4>
+  <p>Creates a <code>FormData</code> with all selected files. If <code>onProgress</code> callback is provided, uses <code>XMLHttpRequest</code> (which exposes upload progress events). Otherwise falls back to <code>authFetch</code>. On success, updates <code>indexed</code> and <code>indexedFiles</code>.</p>
+
+  <h4>streamAsk(question, baseMessages, onToken, onDone, onError)</h4>
+  <p>Calls <code>POST /api/ask/stream</code>. Reads the SSE response body using the browser's <code>ReadableStream</code> API. Buffers partial lines and dispatches events:</p>
+  <pre><code><kw>const</kw> reader = res.body.getReader()
+<kw>const</kw> decoder = <kw>new</kw> TextDecoder()
+<kw>let</kw> buffer = <str>''</str>
+<kw>while</kw> (<kw>true</kw>) {
+  <kw>const</kw> { done, value } = <kw>await</kw> reader.read()
+  <kw>if</kw> (done) <kw>break</kw>
+  buffer += decoder.decode(value, { stream: <kw>true</kw> })
+  <kw>const</kw> lines = buffer.split(<str>'\n'</str>); buffer = lines.pop()
+  <kw>for</kw> (<kw>const</kw> line <kw>of</kw> lines) {
+    <kw>if</kw> (!line.startsWith(<str>'data: '</str>)) <kw>continue</kw>
+    <kw>const</kw> event = JSON.parse(line.slice(<num>6</num>))
+    <kw>if</kw> (event.type === <str>'token'</str>) onToken(event.content)
+    <kw>else if</kw> (event.type === <str>'done'</str>) { onDone(event); <kw>return</kw> }
+  }
+}</code></pre>
+
+  <h4>handleAsk(question)</h4>
+  <p>Immediately adds a user message and a blank streaming assistant message to the state (optimistic UI). Calls <code>streamAsk()</code>. On each token, appends to the streaming message in place. On <code>done</code>, replaces the streaming message with the final message (including sources, trace, suggestions).</p>
+
+  <h4>handleRegenerate(question)</h4>
+  <p>Finds and removes the last assistant message from state, then re-runs <code>streamAsk()</code> for the same question. Uses <code>PUT /api/chat/history</code> (replace all) to sync the final state to MongoDB.</p>
+
+  <h4>handleExportChat()</h4>
+  <p>Converts the messages array to Markdown, creates a Blob, creates a temporary anchor element, and triggers a download. No server round-trip — entirely client-side.</p>
+</section>
+
+<!-- ════════════════════ SECTION 8 — AuthContext ════════════════════ -->
+<section id="s8">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <h2>Frontend — AuthContext.jsx</h2>
+  </div>
+
+  <div class="filepath">frontend/src/context/AuthContext.jsx</div>
+  <p><strong>Role:</strong> A React Context that manages authentication state globally. All child components access it via <code>useAuth()</code>.</p>
+
+  <h3>State</h3>
+  <div class="state-row"><div class="state-key">user</div><div class="state-val">Object <code>{ id, name, email }</code> or null if logged out</div></div>
+  <div class="state-row"><div class="state-key">token</div><div class="state-val">JWT string. Initialised from <code>localStorage.getItem("pdfbot_token")</code> on page load.</div></div>
+  <div class="state-row"><div class="state-key">loading</div><div class="state-val">True while the token is being validated on mount (prevents flash of Login screen)</div></div>
+
+  <h3>Token Validation on Mount</h3>
+  <p>On first render, if a token exists in localStorage, it calls <code>GET /api/auth/me</code>. If the token is still valid, <code>user</code> is set. If it fails (expired/invalid), the token is removed and the user sees the Login page. This happens once via <code>useEffect([], [])</code>.</p>
+
+  <h3>authFetch()</h3>
+  <p>A thin wrapper around <code>fetch()</code> that automatically injects <code>Authorization: Bearer {token}</code>. Used by <code>App.jsx</code> for all authenticated API calls so the token never needs to be passed as a prop.</p>
+
+  <h3>Exposed Values via Context</h3>
+  <pre><code>{ user, token, loading, login, register, logout, authFetch }</code></pre>
+</section>
+
+<!-- ════════════════════ SECTION 9 — Chat.jsx ════════════════════ -->
+<section id="s9">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <h2>Frontend — Chat.jsx</h2>
+  </div>
+
+  <div class="filepath">frontend/src/components/Chat.jsx</div>
+  <p><strong>Role:</strong> The main panel. Renders the message list, the input bar, drag-and-drop upload, and the file scope filter. Contains all scroll and edit logic.</p>
+
+  <h3>Scroll Management</h3>
+  <p>Uses two <code>useRef</code>s: <code>messagesBoxRef</code> (the scrollable container) and <code>messagesEndRef</code> (a sentinel div at the bottom). The <code>scrollToBottom(force)</code> function uses a 30ms debounce timeout — it skips the scroll if the user is scrolled more than 120px from the bottom (so reading history isn't interrupted), unless <code>force=true</code> (new user message).</p>
+
+  <h3>Inline Message Edit</h3>
+  <p>Clicking "Edit" on a user message sets <code>editingIndex</code> and replaces the bubble with an inline textarea. On submit, it calls <code>onTrimMessages(index)</code> (removes everything from that index onward in both state and MongoDB), then fires a new <code>onAsk()</code> with the edited content — creating a fresh branch of conversation.</p>
+
+  <h3>File Upload — Three Entry Points</h3>
+  <table>
+    <thead><tr><th>Trigger</th><th>Code Path</th></tr></thead>
+    <tbody>
+      <tr><td>Click "Upload" zone or attach button</td><td><code>openFilePicker()</code> → <code>fileInputRef.current.click()</code> → <code>handleFileChange()</code></td></tr>
+      <tr><td>Drag &amp; drop anywhere on the chat</td><td><code>handleDrop()</code> → <code>validateAndUpload()</code></td></tr>
+      <tr><td>From Sidebar</td><td>Sidebar calls <code>onUpload()</code> prop directly from App.jsx</td></tr>
+    </tbody>
+  </table>
+
+  <h3>validateAndUpload()</h3>
+  <p>Checks file extension against the accepted list. Enforces the 5-document limit by comparing <code>indexedFiles.length</code> before calling <code>onUpload()</code>. Shows inline error text for invalid files.</p>
+
+  <h3>Document Scope Filter</h3>
+  <p>When more than one file is indexed, a <code>&lt;select&gt;</code> appears above the input bar. Choosing a specific file sets <code>filterFile</code> in App.jsx state, which is passed as a query parameter to <code>/api/ask/stream</code>. The backend uses it to filter the vector similarity search to only chunks from that file.</p>
+</section>
+
+<!-- ════════════════════ SECTION 10 — API REFERENCE ════════════════════ -->
+<section id="s10">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <h2>Complete API Reference</h2>
+  </div>
+
+  <h3>POST /api/auth/register</h3>
+  <p><strong>Body:</strong> <code>{ name, email, password }</code> &nbsp;|&nbsp; <strong>Response:</strong> <code>{ token, user: { id, name, email } }</code></p>
+  <p>Validates that password ≥ 6 chars. Hashes password with bcrypt cost 12. Returns 409 if email already exists.</p>
+
+  <h3>POST /api/auth/login</h3>
+  <p><strong>Body:</strong> <code>{ email, password }</code> &nbsp;|&nbsp; <strong>Response:</strong> <code>{ token, user }</code></p>
+  <p>Returns 401 with a <em>generic</em> error message for both wrong email and wrong password (prevents user enumeration).</p>
+
+  <h3>POST /api/upload</h3>
+  <p><strong>Content-Type:</strong> <code>multipart/form-data</code>, field name: <code>file</code> (supports multiple) &nbsp;|&nbsp; Max file size: 50 MB</p>
+  <p><strong>Response:</strong> <code>{ success, message, chunks, files }</code></p>
+  <p>Enforces a 5-document limit per user. Uploads each file to Cloudinary, then runs <code>ingestFile()</code>. Returns updated <code>files[]</code>.</p>
+
+  <h3>POST /api/ask</h3>
+  <p><strong>Body:</strong></p>
+  <pre><code>{
+  question: <str>"What is X?"</str>,
+  k: <num>4</num>,                          <c>// number of chunks to retrieve</c>
+  chainType: <str>"stuff"</str>,             <c>// "stuff" is the only supported type</c>
+  model: <str>"openai/gpt-4o-mini"</str>,   <c>// any OpenRouter model ID</c>
+  filterFile: <str>"report.pdf"</str>,       <c>// optional: scope to one file</c>
+  queryExpansion: <kw>false</kw>,           <c>// optional: generate query variants</c>
+  history: [{ role, content }]      <c>// last N messages for context</c>
+}</code></pre>
+  <p><strong>Response:</strong> <code>{ results: [{ question, answer, sources, trace, suggestions }] }</code></p>
+
+  <h3>POST /api/ask/stream</h3>
+  <p>Same body as <code>/api/ask</code>. <strong>Response:</strong> <code>Content-Type: text/event-stream</code></p>
+  <p>SSE events format: <code>data: {"type":"token","content":"..."}\n\n</code></p>
+  <p>Sequence: <em>N × token events</em> → <em>1 × done event</em> (with full answer + sources + trace + suggestions)</p>
+
+  <h3>DELETE /api/index/:filename</h3>
+  <p>URL-encodes the filename. Filters vectors and files from <code>store.json</code>. Calls <code>cloudinary.uploader.destroy()</code> for the file. If no files remain, deletes the entire user index directory.</p>
+
+  <h3>DELETE /api/index</h3>
+  <p>Destroys all Cloudinary files for the user (reads <code>cloudinaryMeta</code> from <code>store.json</code>), then deletes the entire <code>./vector_index/{userId}/</code> directory.</p>
+</section>
+
+<!-- ════════════════════ SECTION 11 — DATA FLOW ════════════════════ -->
+<section id="s11">
+  <div class="section-header">
+    <div class="section-num">11</div>
+    <h2>Data &amp; Request Flow</h2>
+  </div>
+
+  <h3>Upload Flow</h3>
+  <pre><code>User selects file in browser
+  → FormData sent via XHR to POST /api/upload (with progress events)
+  → multer stores file as Buffer in memory (req.files[])
+  → uploadToCloudinary(buffer, name) → Cloudinary CDN → returns {url, publicId}
+  → ingestFile(buffer, name, cloudinaryData, userId)
+      → extract text (pdf-parse / xlsx / vision LLM)
+      → chunk into 1000-char pieces with 150 overlap
+      → embed all chunks with text-embedding-ada-002
+      → generate 2-3 sentence summary
+      → read existing store.json (if exists) → merge vectors + files
+      → write updated store.json to ./vector_index/{userId}/
+  → invalidateCache(userId) clears vectorStoreCache
+  → respond { success, files[] }</code></pre>
+
+  <h3>Q&amp;A Streaming Flow</h3>
+  <pre><code>User types question → presses Enter
+  → App.jsx handleAsk() adds { role:'user', content } to messages
+  → adds { role:'assistant', content:'', streaming:true } placeholder
+  → POST /api/ask/stream
+
+Backend:
+  → requireAuth validates JWT, sets req.user.id
+  → runQAStream* generator starts
+  → getVectorStore(uid): check cache → if miss, read store.json, hydrate MemoryVectorStore
+  → getEmbedding(question): check cache → if miss, call embedding API
+  → similaritySearchVectorWithScore(queryEmbedding, k, filterFile?)
+  → filter results below 0.2 cosine threshold
+  → build prompt with context + conversation history
+  → chain.stream(question) → yields LangChain tokens
+  → for each token: yield { type:'token', content }  ← sent as SSE line
+  → after stream: generate suggestions (separate LLM call)
+  → yield { type:'done', answer, sources, trace, suggestions }
+
+Browser SSE reader:
+  → each 'token' event: append content to streaming message
+  → 'done' event: replace streaming message with final message
+  → appendHistory([userMsg, assistantMsg]) → POST /api/chat/history</code></pre>
+
+  <h3>Auth Flow</h3>
+  <pre><code>Page load:
+  → AuthContext reads localStorage('pdfbot_token')
+  → if token exists: GET /api/auth/me → sets user state
+  → if no token or invalid: show Login page
+
+Login:
+  → POST /api/auth/login → receives { token, user }
+  → stores token in localStorage + sets user state
+  → App.jsx renders MainApp
+
+Logout:
+  → removes localStorage token → sets user/token to null
+  → App.jsx renders Login</code></pre>
+</section>
+
+<!-- ════════════════════ SECTION 12 — ALGORITHMS ════════════════════ -->
+<section id="s12">
+  <div class="section-header">
+    <div class="section-num">12</div>
+    <h2>Key Algorithms Explained</h2>
+  </div>
+
+  <h3>Vector Similarity Search (Cosine Similarity)</h3>
+  <p>When a user asks a question, it is converted into a 1536-dimensional float vector (embedding). The system compares this vector against every stored chunk vector using <strong>cosine similarity</strong> — a score between 0 and 1. A score of 1.0 means the vectors point in exactly the same direction (semantically identical). The top-k most similar chunks are returned as context.</p>
+  <p>A <strong>minimum threshold of 0.2</strong> filters out completely unrelated chunks. If no chunk passes the threshold, the best single result is returned anyway (fallback — prevents empty context).</p>
+
+  <h3>Recursive Text Splitting</h3>
+  <p>LangChain's <code>RecursiveCharacterTextSplitter</code> splits on <code>\n\n</code>, then <code>\n</code>, then <code>" "</code> — trying to keep semantically complete units (paragraphs, sentences) together. Parameters used: <code>chunkSize=1000</code> chars, <code>chunkOverlap=150</code> chars. The overlap ensures context at chunk boundaries isn't lost.</p>
+
+  <h3>Query Expansion</h3>
+  <p>When enabled, a lightweight LLM call generates 2 alternative phrasings of the user's question. This improves recall for questions that use different vocabulary than the source document. The three queries (original + 2 alternatives) are each embedded and searched independently. Results are merged, deduplicated by content (first 120 chars used as key), re-ranked by score, and truncated to top-k.</p>
+
+  <h3>Streaming with Server-Sent Events (SSE)</h3>
+  <p>The server sets <code>Content-Type: text/event-stream</code> and keeps the HTTP connection open. As the LLM generates tokens, each is written as <code>data: {...}\n\n</code>. The browser reads this using the <code>ReadableStream</code> API — not <code>EventSource</code> (which doesn't support POST). This allows the app to stream into an existing POST request while passing the full auth token and body payload.</p>
+
+  <h3>Image Understanding via Vision LLM</h3>
+  <p>For uploaded images, the system Base64-encodes the image and sends it to GPT-4o-mini's vision endpoint with a detailed prompt asking for a comprehensive description. This description is then embedded and stored like any other text chunk. The result: users can ask questions about diagrams, charts, flowcharts, or scanned documents just like they ask about PDFs.</p>
+
+  <h3>LRU Embedding Cache</h3>
+  <p>The <code>embeddingCache</code> Map holds up to 100 question → embedding pairs. When the 101st entry is added, the oldest entry (first key in insertion order) is evicted. This is a simple manual LRU using JavaScript Map's guaranteed insertion-order iteration. It prevents repeat embedding API calls for identical questions in the same server session.</p>
+
+  <div class="callout tip">
+    <strong>Settings Persistence</strong>
+    The <code>settings</code> object (<code>k</code>, <code>model</code>, <code>queryExpansion</code>, etc.) is saved to <code>localStorage</code> under the key <code>pdfbot_settings</code> on every change. It also includes a model migration guard — if the stored model is an old Gemini ID, it is automatically upgraded to the current ID on load.
+  </div>
+</section>
+
+<div class="footer">
+  DocuChat AI — Complete Code Understanding &nbsp;·&nbsp; Generated April 2026 &nbsp;·&nbsp; PDF Q&amp;A Bot JS
+</div>
+
+</body>
+</html>

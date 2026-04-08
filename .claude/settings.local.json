@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pandoc --version)",
+      "Bash(npm --version)",
+      "Bash(npm list:*)",
+      "Bash(mkdir -p \"D:/PDF Q&A Bot JS/pdf-gen\")",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(node generate.mjs)",
+      "Bash(rm:*)",
+      "Read(//d//**)",
+      "Bash(rm -rf \"D:/PDF Q&A Bot JS/pdf-gen\")",
+      "Bash(rm -rf \"D:/PDF Q&A Bot JS/pptx-gen\")"
+    ]
+  }
+}
