@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vercel Deployment Plan — DocuChat AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #0070f3;
+    --primary-dark: #0051cc;
+    --success: #00c851;
+    --warning: #ff8800;
+    --danger: #ff4444;
+    --bg: #ffffff;
+    --surface: #f7f7f7;
+    --border: #e5e5e5;
+    --text: #111111;
+    --muted: #555555;
+    --code-bg: #1a1a2e;
+    --code-text: #e0e0e0;
+    --accent-bg: #eff6ff;
+    --accent-border: #bfdbfe;
+    --warn-bg: #fffbeb;
+    --warn-border: #fde68a;
+    --step-size: 32px;
+  }
+
+  html { font-size: 15px; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 40px 80px;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    text-align: center;
+    padding: 56px 0 48px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .cover .badge {
+    display: inline-block;
+    background: var(--primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 99px;
+    margin-bottom: 20px;
+  }
+  .cover h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    letter-spacing: -0.02em;
+  }
+  .cover h1 span { color: var(--primary); }
+  .cover p {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0 auto 24px;
+  }
+  .meta {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .meta span::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+    page-break-inside: avoid;
+  }
+  .toc h2 { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  .toc ol { padding-left: 20px; }
+  .toc li { padding: 3px 0; font-size: 0.92rem; }
+  .toc a { color: var(--primary); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  /* ── Architecture box ── */
+  .arch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 24px 0;
+    page-break-inside: avoid;
+  }
+  .arch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .arch-card h4 { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .arch-card p { font-size: 0.88rem; color: var(--text); margin: 0; }
+
+  /* ── Section headers ── */
+  section { margin-bottom: 52px; }
+  section > h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  section > h2 .num {
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  h3 { font-size: 1rem; font-weight: 600; margin: 20px 0 10px; }
+
+  /* ── Steps ── */
+  .steps { list-style: none; padding: 0; }
+  .steps li {
+    display: grid;
+    grid-template-columns: var(--step-size) 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+    align-items: start;
+  }
+  .step-num {
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: var(--step-size); height: var(--step-size);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-body { padding-top: 4px; }
+  .step-body strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
+  .step-body p, .step-body ul { font-size: 0.88rem; color: var(--muted); margin: 0; }
+  .step-body ul { padding-left: 18px; }
+  .step-body ul li { margin: 2px 0; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 0.8rem;
+    overflow-x: auto;
+    margin: 12px 0;
+    line-height: 1.6;
+    page-break-inside: avoid;
+  }
+  code {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    background: #f0f0f0;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.82em;
+    color: #c7254e;
+  }
+  pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+  .comment { color: #6a9955; }
+  .key { color: #9cdcfe; }
+  .val { color: #ce9178; }
+  .kw { color: #569cd6; }
+  .fn { color: #dcdcaa; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 0.875rem;
+    page-break-inside: avoid;
+  }
+  .callout.info { background: var(--accent-bg); border-left: 4px solid var(--primary); }
+  .callout.warn { background: var(--warn-bg); border-left: 4px solid var(--warning); }
+  .callout.danger { background: #fff0f0; border-left: 4px solid var(--danger); }
+  .callout.success { background: #f0fff4; border-left: 4px solid var(--success); }
+  .callout strong { display: block; margin-bottom: 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; }
+  .callout.info strong { color: var(--primary); }
+  .callout.warn strong { color: var(--warning); }
+  .callout.danger strong { color: var(--danger); }
+  .callout.success strong { color: var(--success); }
+
+  /* ── Env table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 0.82rem;
+    page-break-inside: avoid;
+  }
+  thead tr { background: var(--primary); color: #fff; }
+  thead th { padding: 10px 14px; text-align: left; font-weight: 600; }
+  tbody tr:nth-child(even) { background: var(--surface); }
+  tbody td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tbody td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #c7254e; }
+  tbody td:last-child { color: var(--muted); font-size: 0.8rem; }
+
+  /* ── vercel.json highlight ── */
+  .file-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .file-label::before {
+    content: '';
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    background: var(--primary);
+  }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 0.88rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist .box {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 64px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  @media print {
+    body { padding: 24px 28px; }
+    section { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+    pre, table, .callout { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     COVER
+══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="badge">Deployment Guide</div>
+  <h1>Deploy <span>DocuChat AI</span><br>to Vercel</h1>
+  <p>Complete step-by-step plan for deploying your React + Vite frontend and Express.js backend on Vercel with MongoDB Atlas.</p>
+  <div class="meta">
+    <span>Project: PDF Q&amp;A Bot JS</span>
+    <span>Platform: Vercel</span>
+    <span>Date: April 2026</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TABLE OF CONTENTS
+══════════════════════════════════════════════════════════ -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#s1">Architecture Overview</a></li>
+    <li><a href="#s2">Prerequisites &amp; Accounts</a></li>
+    <li><a href="#s3">Critical Code Change — Move Vector Index to MongoDB</a></li>
+    <li><a href="#s4">Add Vercel Configuration Files</a></li>
+    <li><a href="#s5">Set Up GitHub Repository</a></li>
+    <li><a href="#s6">Set Up MongoDB Atlas</a></li>
+    <li><a href="#s7">Import Project in Vercel</a></li>
+    <li><a href="#s8">Configure Environment Variables</a></li>
+    <li><a href="#s9">Configure Frontend API URL</a></li>
+    <li><a href="#s10">Deploy &amp; Verify</a></li>
+    <li><a href="#s11">Post-Deployment Checklist</a></li>
+  </ol>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 1 — ARCHITECTURE
+══════════════════════════════════════════════════════════ -->
+<section id="s1">
+  <h2><span class="num">1</span> Architecture Overview</h2>
+  <p>Your project is a monorepo with two separate apps. Here is how they map to Vercel's deployment model:</p>
+
+  <div class="arch">
+    <div class="arch-card">
+      <h4>Frontend (React + Vite)</h4>
+      <p>Deployed as a <strong>Vercel Static Site</strong>. Vite builds it into <code>dist/</code>, served from Vercel's global CDN. Zero server required.</p>
+    </div>
+    <div class="arch-card">
+      <h4>Backend (Express.js)</h4>
+      <p>Deployed as a <strong>Vercel Serverless Function</strong> using <code>@vercel/node</code>. Your entire Express app runs as one serverless endpoint.</p>
+    </div>
+    <div class="arch-card">
+      <h4>Database</h4>
+      <p>Replaced local MongoDB with <strong>MongoDB Atlas</strong> (free M0 tier). All user data, chat history, and the vector index live here.</p>
+    </div>
+    <div class="arch-card">
+      <h4>File Storage</h4>
+      <p>Already using <strong>Cloudinary</strong> — no change needed. Uploaded PDFs/images are stored there.</p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>Important Constraint</strong>
+    Vercel's serverless functions have a <strong>read-only filesystem</strong>. Your backend currently writes the vector index to <code>./vector_index/</code> on disk. This will NOT work on Vercel. Step 3 covers how to fix this by storing the index in MongoDB instead.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 2 — PREREQUISITES
+══════════════════════════════════════════════════════════ -->
+<section id="s2">
+  <h2><span class="num">2</span> Prerequisites &amp; Accounts</h2>
+
+  <p>Make sure you have accounts and tools ready before starting:</p>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Vercel Account</strong>
+        <p>Sign up at <strong>vercel.com</strong> (free Hobby plan is enough). Install the CLI: <code>npm i -g vercel</code></p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>GitHub Account</strong>
+        <p>Vercel integrates with GitHub for automatic deployments on every push. Your code must be in a GitHub repo.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>MongoDB Atlas Account</strong>
+        <p>Sign up at <strong>cloud.mongodb.com</strong>. The free M0 cluster (512 MB) is sufficient for this project.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Existing Accounts (you already have these)</strong>
+        <ul>
+          <li>Cloudinary — cloud_name: <code>dr2qvcj91</code></li>
+          <li>OpenRouter API key — already in <code>.env</code></li>
+        </ul>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <strong>Node.js 18+ installed locally</strong>
+        <p>Vercel deploys with Node 18 by default. Ensure your local version matches: <code>node --version</code></p>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 3 — CRITICAL CODE CHANGE
+══════════════════════════════════════════════════════════ -->
+<section id="s3">
+  <h2><span class="num">3</span> Critical Code Change — Move Vector Index to MongoDB</h2>
+
+  <div class="callout danger">
+    <strong>Required Before Deploying</strong>
+    This is the most important change. Without it your uploads and Q&amp;A will silently break on Vercel because the <code>./vector_index/</code> directory cannot persist between serverless function invocations.
+  </div>
+
+  <h3>3.1 — Create a Mongoose model for the vector store</h3>
+  <p>Create a new file <code>backend/models/VectorIndex.js</code>:</p>
+
+  <div class="file-label">backend/models/VectorIndex.js</div>
+  <pre><code><kw>import</kw> mongoose <kw>from</kw> <val>"mongoose"</val>;
+
+<kw>const</kw> vectorIndexSchema = <kw>new</kw> mongoose.Schema({
+  <key>userId</key>: { type: String, required: <kw>true</kw>, unique: <kw>true</kw> },
+  <key>vectors</key>: { type: Array, default: [] },
+  <key>files</key>:   { type: Array, default: [] },
+  <key>cloudinaryMeta</key>: { type: Object, default: {} },
+}, { timestamps: <kw>true</kw> });
+
+<kw>export const</kw> VectorIndex = mongoose.model(<val>"VectorIndex"</val>, vectorIndexSchema);</code></pre>
+
+  <h3>3.2 — Replace filesystem reads/writes in <code>ingest.js</code></h3>
+  <p>Wherever <code>ingest.js</code> reads or writes <code>store.json</code>, replace with MongoDB calls:</p>
+
+  <div class="file-label">Pattern to replace in ingest.js</div>
+  <pre><code><comment>// BEFORE (filesystem — does not work on Vercel)</comment>
+<kw>import</kw> fs <kw>from</kw> <val>"fs"</val>;
+<kw>const</kw> indexFile = path.join(<val>"./vector_index"</val>, uid, <val>"store.json"</val>);
+fs.writeFileSync(indexFile, JSON.stringify(data));
+<kw>const</kw> data = JSON.parse(fs.readFileSync(indexFile, <val>"utf8"</val>));
+
+<comment>// AFTER (MongoDB — works everywhere)</comment>
+<kw>import</kw> { VectorIndex } <kw>from</kw> <val>"./models/VectorIndex.js"</val>;
+<kw>await</kw> VectorIndex.findOneAndUpdate(
+  { userId: uid },
+  { $set: { vectors, files, cloudinaryMeta } },
+  { upsert: <kw>true</kw> }
+);
+<kw>const</kw> doc = <kw>await</kw> VectorIndex.findOne({ userId: uid });</code></pre>
+
+  <div class="callout info">
+    <strong>Also update server.js</strong>
+    The <code>DELETE /api/index</code> and <code>DELETE /api/index/:filename</code> routes in <code>server.js</code> also use <code>fs.readFileSync</code> / <code>fs.rmSync</code> on the vector_index folder. Update those routes to use <code>VectorIndex.findOneAndDelete()</code> / <code>VectorIndex.findOneAndUpdate()</code> instead.
+  </div>
+
+  <h3>3.3 — Remove the <code>vector_index</code> directory from git</h3>
+  <pre><code><comment># Add to .gitignore</comment>
+vector_index/
+node_modules/
+.env
+backend/.env</code></pre>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 4 — VERCEL CONFIG FILES
+══════════════════════════════════════════════════════════ -->
+<section id="s4">
+  <h2><span class="num">4</span> Add Vercel Configuration Files</h2>
+
+  <p>Create a <code>vercel.json</code> at the root of your project. This tells Vercel how to build and route both apps from one repository.</p>
+
+  <div class="file-label">vercel.json (project root)</div>
+  <pre><code>{
+  <key>"version"</key>: <val>2</val>,
+  <key>"builds"</key>: [
+    {
+      <comment>// Backend: wrap Express as a serverless function</comment>
+      <key>"src"</key>: <val>"backend/server.js"</val>,
+      <key>"use"</key>: <val>"@vercel/node"</val>
+    },
+    {
+      <comment>// Frontend: build with Vite</comment>
+      <key>"src"</key>: <val>"frontend/package.json"</val>,
+      <key>"use"</key>: <val>"@vercel/static-build"</val>,
+      <key>"config"</key>: { <key>"distDir"</key>: <val>"dist"</val> }
+    }
+  ],
+  <key>"routes"</key>: [
+    {
+      <comment>// API calls go to the Express serverless function</comment>
+      <key>"src"</key>: <val>"/api/(.*)"</val>,
+      <key>"dest"</key>: <val>"backend/server.js"</val>
+    },
+    {
+      <comment>// Everything else serves the React SPA</comment>
+      <key>"src"</key>: <val>"/(.*)"</val>,
+      <key>"dest"</key>: <val>"frontend/$1"</val>
+    }
+  ]
+}</code></pre>
+
+  <div class="callout info">
+    <strong>Frontend build command</strong>
+    Vercel needs a <code>build</code> script in <code>frontend/package.json</code>. You already have <code>"build": "node node_modules/vite/bin/vite.js build"</code> — that's fine. Vercel will run it automatically.
+  </div>
+
+  <h3>Create a <code>.vercelignore</code> file</h3>
+  <div class="file-label">.vercelignore (project root)</div>
+  <pre><code>**/node_modules
+**/.env
+vector_index/
+Documentation.pdf
+Presentation.pptx
+generate_presentation.js</code></pre>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 5 — GITHUB REPO
+══════════════════════════════════════════════════════════ -->
+<section id="s5">
+  <h2><span class="num">5</span> Set Up GitHub Repository</h2>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Create a new repository on GitHub</strong>
+        <p>Go to <strong>github.com/new</strong>. Name it <code>docuchat-ai</code> (or any name). Set to <strong>Private</strong> to protect your API keys.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Initialise git and push your code</strong>
+        <pre><code>cd "D:/PDF Q&A Bot JS"
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR_USERNAME/docuchat-ai.git
+git push -u origin main</code></pre>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Confirm <code>.env</code> is NOT committed</strong>
+        <p>Run <code>git status</code> — the <code>.env</code> files must show as <em>ignored</em>, not staged. If they appear, add them to <code>.gitignore</code> and run <code>git rm --cached backend/.env</code>.</p>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 6 — MONGODB ATLAS
+══════════════════════════════════════════════════════════ -->
+<section id="s6">
+  <h2><span class="num">6</span> Set Up MongoDB Atlas</h2>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Create a free cluster</strong>
+        <p>Log in to <strong>cloud.mongodb.com</strong> → <em>Create a cluster</em> → choose <strong>M0 Free Tier</strong> → select any region → click <em>Create Cluster</em>.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Create a database user</strong>
+        <p>Go to <em>Security → Database Access</em> → <em>Add New Database User</em>. Set authentication to <em>Password</em>. Save the username and password — you'll need them for the connection string.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Whitelist all IPs (for Vercel)</strong>
+        <p>Go to <em>Security → Network Access</em> → <em>Add IP Address</em> → click <em>"Allow Access from Anywhere"</em> (<code>0.0.0.0/0</code>). Vercel uses dynamic IPs so this is required.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Get your connection string</strong>
+        <p>Go to <em>Clusters → Connect → Connect your application</em>. Copy the URI. It will look like:</p>
+        <pre><code>mongodb+srv://&lt;username&gt;:&lt;password&gt;@cluster0.xxxxx.mongodb.net/pdfqabot?retryWrites=true&w=majority</code></pre>
+        <p>Replace <code>&lt;username&gt;</code> and <code>&lt;password&gt;</code> with your database user credentials.</p>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 7 — IMPORT PROJECT IN VERCEL
+══════════════════════════════════════════════════════════ -->
+<section id="s7">
+  <h2><span class="num">7</span> Import Project in Vercel</h2>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Go to vercel.com/new</strong>
+        <p>Click <em>"Add New… → Project"</em>.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Connect your GitHub account</strong>
+        <p>Authorise Vercel to access your repositories if you haven't already.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Import the <code>docuchat-ai</code> repo</strong>
+        <p>Click <em>Import</em> next to the repository you pushed in Step 5.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Configure build settings (Vercel auto-detects from vercel.json)</strong>
+        <p>Because you added <code>vercel.json</code>, Vercel will read it automatically. You can leave the build settings as-is — do <strong>not</strong> override the Framework Preset.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <strong>Do NOT deploy yet — add env vars first (next step)</strong>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 8 — ENVIRONMENT VARIABLES
+══════════════════════════════════════════════════════════ -->
+<section id="s8">
+  <h2><span class="num">8</span> Configure Environment Variables</h2>
+
+  <p>In the Vercel project → <em>Settings → Environment Variables</em>, add all of the following:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Variable Name</th>
+        <th>Value</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>MONGODB_URI</td>
+        <td><em>Your Atlas connection string</em></td>
+        <td>From Step 6.4 — include database name</td>
+      </tr>
+      <tr>
+        <td>JWT_SECRET</td>
+        <td><em>A long random string</em></td>
+        <td>Generate with: <code>openssl rand -hex 32</code></td>
+      </tr>
+      <tr>
+        <td>OPENROUTER_API_KEY</td>
+        <td><em>Your OpenRouter key</em></td>
+        <td>From your current <code>.env</code></td>
+      </tr>
+      <tr>
+        <td>OPENROUTER_BASE_URL</td>
+        <td>https://openrouter.ai/api/v1</td>
+        <td>Same as local</td>
+      </tr>
+      <tr>
+        <td>CLOUDINARY_CLOUD_NAME</td>
+        <td>dr2qvcj91</td>
+        <td>From your current <code>.env</code></td>
+      </tr>
+      <tr>
+        <td>CLOUDINARY_API_KEY</td>
+        <td><em>Your Cloudinary API key</em></td>
+        <td>From your current <code>.env</code></td>
+      </tr>
+      <tr>
+        <td>CLOUDINARY_API_SECRET</td>
+        <td><em>Your Cloudinary secret</em></td>
+        <td>From your current <code>.env</code></td>
+      </tr>
+      <tr>
+        <td>ALLOWED_ORIGINS</td>
+        <td><em>Your Vercel frontend URL</em></td>
+        <td>e.g. <code>https://docuchat-ai.vercel.app</code> — set AFTER first deploy</td>
+      </tr>
+      <tr>
+        <td>NODE_ENV</td>
+        <td>production</td>
+        <td>Enables production error handling</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <strong>Two-step for ALLOWED_ORIGINS</strong>
+    You won't know your Vercel URL until after the first deploy. For the first deploy, set <code>ALLOWED_ORIGINS=*</code> temporarily, then update it to your real URL after deployment.
+  </div>
+
+  <div class="callout info">
+    <strong>Apply to all environments</strong>
+    When adding each variable in Vercel, check all three boxes: Production, Preview, and Development.
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 9 — FRONTEND API URL
+══════════════════════════════════════════════════════════ -->
+<section id="s9">
+  <h2><span class="num">9</span> Configure Frontend API URL</h2>
+
+  <p>Your frontend must call the backend at the right URL. The cleanest approach is to use a Vite environment variable.</p>
+
+  <h3>9.1 — Create environment files</h3>
+
+  <div class="file-label">frontend/.env.development (local dev)</div>
+  <pre><code>VITE_API_URL=http://localhost:3001</code></pre>
+
+  <div class="file-label">frontend/.env.production (Vercel build)</div>
+  <pre><code><comment># Leave empty — on Vercel, frontend and backend share the same domain</comment>
+VITE_API_URL=</code></pre>
+
+  <h3>9.2 — Use the variable in your fetch calls</h3>
+  <p>Find every place in your React code that hardcodes the API URL (e.g. <code>http://localhost:3001/api/...</code>) and replace it:</p>
+
+  <div class="file-label">frontend/src — any file with API calls</div>
+  <pre><code><comment>// Before</comment>
+fetch(<val>"http://localhost:3001/api/upload"</val>, ...)
+
+<comment>// After</comment>
+<kw>const</kw> BASE = import.meta.env.VITE_API_URL || <val>""</val>;
+fetch(<val>`${BASE}/api/upload`</val>, ...)</code></pre>
+
+  <p>When <code>VITE_API_URL</code> is empty (on Vercel), the path resolves to <code>/api/upload</code> — a relative URL that hits the same Vercel domain where the serverless backend runs.</p>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 10 — DEPLOY & VERIFY
+══════════════════════════════════════════════════════════ -->
+<section id="s10">
+  <h2><span class="num">10</span> Deploy &amp; Verify</h2>
+
+  <ul class="steps">
+    <li>
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <strong>Trigger the first deployment</strong>
+        <p>In the Vercel dashboard, click <em>"Deploy"</em>. Vercel will clone your repo, run both builds, and publish. This takes ~2–3 minutes. Watch the build logs for errors.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <strong>Check build logs</strong>
+        <p>In the deployment log, confirm you see:</p>
+        <ul>
+          <li>Frontend: <code>vite build</code> completes without errors</li>
+          <li>Backend: <code>@vercel/node</code> bundles <code>server.js</code> without errors</li>
+        </ul>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <strong>Test the backend health endpoint</strong>
+        <p>Visit <code>https://your-app.vercel.app/api/auth/...</code> (or any public endpoint) in your browser. You should get a JSON response, not a 404.</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <strong>Update <code>ALLOWED_ORIGINS</code></strong>
+        <p>Copy your Vercel URL (e.g. <code>https://docuchat-ai.vercel.app</code>). Go to Vercel → Settings → Environment Variables → update <code>ALLOWED_ORIGINS</code> to that URL. Then trigger a new deployment (push an empty commit or click <em>Redeploy</em>).</p>
+      </div>
+    </li>
+    <li>
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <strong>End-to-end test</strong>
+        <ul>
+          <li>Register a new account</li>
+          <li>Upload a PDF file</li>
+          <li>Ask a question — confirm a streaming answer appears</li>
+          <li>Delete the document — confirm it is removed</li>
+        </ul>
+      </div>
+    </li>
+  </ul>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     SECTION 11 — POST-DEPLOYMENT CHECKLIST
+══════════════════════════════════════════════════════════ -->
+<section id="s11">
+  <h2><span class="num">11</span> Post-Deployment Checklist</h2>
+
+  <ul class="checklist">
+    <li><div class="box"></div><span>Vector index reads/writes use MongoDB (not local filesystem)</span></li>
+    <li><div class="box"></div><span><code>MONGODB_URI</code> points to Atlas (not <code>localhost</code>)</span></li>
+    <li><div class="box"></div><span><code>ALLOWED_ORIGINS</code> is set to the live Vercel URL</span></li>
+    <li><div class="box"></div><span><code>.env</code> files are in <code>.gitignore</code> and never committed</span></li>
+    <li><div class="box"></div><span>Frontend uses <code>VITE_API_URL</code> (empty string = relative URL) for all API calls</span></li>
+    <li><div class="box"></div><span><code>vercel.json</code> is committed to the root of the repository</span></li>
+    <li><div class="box"></div><span>MongoDB Atlas Network Access allows <code>0.0.0.0/0</code></span></li>
+    <li><div class="box"></div><span>Cloudinary credentials are set in Vercel env vars (not hardcoded)</span></li>
+    <li><div class="box"></div><span><code>JWT_SECRET</code> is a new, strong random value (not the development placeholder)</span></li>
+    <li><div class="box"></div><span>End-to-end flow tested: register → upload → ask → delete</span></li>
+  </ul>
+
+  <div class="callout success">
+    <strong>Continuous Deployment</strong>
+    Once set up, every <code>git push</code> to your <code>main</code> branch automatically triggers a new Vercel deployment. Preview deployments are created for every pull request automatically.
+  </div>
+
+  <div class="callout warn">
+    <strong>Vercel Hobby Plan Limits</strong>
+    The free Hobby plan has a <strong>10-second function timeout</strong>. If PDF ingestion or long LLM responses exceed 10s, consider upgrading to the Pro plan (60s timeout) or optimising your chunking size in <code>ingest.js</code>.
+  </div>
+</section>
+
+<div class="footer">
+  DocuChat AI — Vercel Deployment Guide &nbsp;·&nbsp; Generated April 2026 &nbsp;·&nbsp; PDF Q&amp;A Bot JS
+</div>
+
+</body>
+</html>
