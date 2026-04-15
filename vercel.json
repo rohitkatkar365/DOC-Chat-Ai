@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      // Backend: wrap Express as a serverless function
+      "src": "backend/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      // Frontend: build with Vite
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "routes": [
+    {
+      // API calls go to the Express serverless function
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      // Everything else serves the React SPA
+      "src": "/(.*)",
+      "dest": "frontend/$1"
+    }
+  ]
+}
