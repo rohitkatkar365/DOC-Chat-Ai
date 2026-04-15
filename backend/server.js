@@ -46,6 +46,12 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
   : ["http://localhost:5173"];
 
+// Ensure DB is connected before any request (cached after first call)
+app.use(async (_req, _res, next) => {
+  try { await connectDB(); next(); }
+  catch (err) { next(err); }
+});
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. curl, Postman) or matching allowed origins
@@ -374,13 +380,13 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ error: message });
 });
 
-// Start
-connectDB().then(() => {
+// Export for Vercel serverless
+export default app;
+
+// Local dev only
+if (process.env.NODE_ENV !== "production") {
   app.listen(PORT, () => {
     console.log(`DocuChat AI backend listening on http://localhost:${PORT}`);
     console.log(`  OpenRouter base URL: ${process.env.OPENROUTER_BASE_URL ?? "(not set)"}`);
   });
-}).catch(err => {
-  console.error("[Fatal] MongoDB connection failed:", err.message);
-  process.exit(1);
-});
+}
