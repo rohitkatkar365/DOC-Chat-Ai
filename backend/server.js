@@ -46,13 +46,19 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
   : ["http://localhost:5173"];
 
+// Automatically allow the Vercel deployment URLs
+if (process.env.VERCEL_URL) ALLOWED_ORIGINS.push(`https://${process.env.VERCEL_URL}`);
+if (process.env.VERCEL_PROJECT_PRODUCTION_URL) ALLOWED_ORIGINS.push(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
+
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (e.g. curl, Postman) or matching allowed origins
     if (!origin || ALLOWED_ORIGINS.includes(origin) || /^http:\/\/localhost(:\d+)?$/.test(origin)) {
       callback(null, true);
     } else {
-      callback(new Error(`CORS: origin '${origin}' not allowed`));
+      const err = new Error(`CORS: origin '${origin}' not allowed`);
+      err.status = 403;
+      callback(err);
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
