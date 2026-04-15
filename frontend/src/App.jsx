@@ -5,7 +5,7 @@ import Login from './components/Login'
 import Register from './components/Register'
 import { useAuth } from './context/AuthContext'
 
-const API = 'http://localhost:3001/api'
+const API = '/api'
 
 function MainApp() {
   const { user, logout, authFetch, token } = useAuth()
