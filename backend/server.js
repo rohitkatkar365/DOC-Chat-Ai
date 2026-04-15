@@ -62,6 +62,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Connect to DB on each request (cached after first connection — safe for serverless)
+app.use(async (_req, _res, next) => {
+  try { await connectDB(); next(); }
+  catch (err) { next(err); }
+});
+
 // Rate limiting
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, standardHeaders: true, legacyHeaders: false });
 app.use("/api/", limiter);
@@ -374,17 +380,20 @@ app.use((err, _req, res, _next) => {
   res.status(status).json({ error: message });
 });
 
-// Start server (works for both Vercel experimentalServices and local dev)
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`DocuChat AI backend listening on port ${PORT}`);
-      console.log(`  OpenRouter base URL: ${process.env.OPENROUTER_BASE_URL ?? "(not set)"}`);
+// Local dev: start the server
+if (!process.env.VERCEL) {
+  connectDB()
+    .then(() => {
+      app.listen(PORT, () => {
+        console.log(`DocuChat AI backend listening on http://localhost:${PORT}`);
+        console.log(`  OpenRouter base URL: ${process.env.OPENROUTER_BASE_URL ?? "(not set)"}`);
+      });
+    })
+    .catch((err) => {
+      console.error("[Fatal] MongoDB connection failed:", err.message);
+      process.exit(1);
     });
-  })
-  .catch((err) => {
-    console.error("[Fatal] MongoDB connection failed:", err.message);
-    process.exit(1);
-  });
+}
 
+// Vercel: export the Express app as the serverless handler
 export default app;
